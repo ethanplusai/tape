@@ -1,0 +1,25 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run hardware:model
+      - run: git diff --exit-code docs/hardware/cost-results.json docs/hardware/cost-results.csv
+      - run: npm run audit:public
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Browser validation
+        run: |
+          npm start > /tmp/tape-server.log 2>&1 &
+          node -e 'const wait=async()=>{for(let i=0;i<30;i++){try{if((await fetch("http://127.0.0.1:4293")).ok)return;}catch{}await new Promise(r=>setTimeout(r,200));}process.exit(1)};wait()'
+          npm run test:browser

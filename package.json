@@ -1,0 +1,17 @@
+{
+  "name": "tape-session-deck",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TAPE: a playable four-layer browser looper and an open product-development study.",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "audit:public": "node scripts/audit-public.mjs",
+    "hardware:model": "node scripts/hardware-model.mjs"
+  },
+  "devDependencies": {"playwright": "^1.63.0"}
+}

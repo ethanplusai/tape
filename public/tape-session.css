@@ -1,0 +1,50 @@
+/* TAPE v8: preserve the approved 1448×1086 assembled photograph. */
+.ts-minimal .tp-product-visual{aspect-ratio:4/3;transform-origin:81% 62%}
+.ts-minimal .tp-viewfinder{aspect-ratio:4/3}
+.ts-minimal .tp-product-visual>.ts-body-photo{display:block;width:100%;height:auto;transform:none;mix-blend-mode:normal}
+.ts-photo-crop{display:block;position:absolute;inset:0;overflow:hidden;border-radius:10%;pointer-events:none}
+.ts-photo-crop img{position:absolute;max-width:none;object-fit:fill;pointer-events:none;user-select:none}
+.ts-physical-key{position:absolute;border:0;padding:0;background:none;cursor:pointer;z-index:5;touch-action:none;border-radius:12%}
+.ts-physical-key .ts-photo-crop{transition:filter 90ms,transform 90ms;transform-origin:50% 75%}
+.ts-physical-key.is-pressed .ts-photo-crop,.ts-physical-key:active .ts-photo-crop{filter:brightness(.8);transform:translateY(2%) scale(.985)}
+.ts-physical-key:disabled{cursor:default}
+.ts-physical-key:focus-visible,.ts-push-dial:focus-visible,.ts-power:focus-visible,.ts-volume-wheel:focus-visible{outline:2px solid #ed5439;outline-offset:4px}
+.ts-push-dial{position:absolute;z-index:5;cursor:grab;touch-action:none;border-radius:50%;outline:none;user-select:none}
+.ts-push-dial:active{cursor:grabbing}.ts-push-dial.is-pressed{filter:brightness(.92)}
+/* A circular face turns BEFORE the fixed camera projection. The real barrel stays in the photo. */
+.ts-face-projection{position:absolute;left:0;top:0;width:100%;aspect-ratio:1;transform:scaleY(.8653846);transform-origin:50% 0;border-radius:50%;overflow:hidden;pointer-events:none}
+.ts-dial-face{position:absolute;inset:0;display:block;transform:rotate(var(--dial-angle,0deg));border-radius:50%;overflow:hidden;transition:transform 70ms linear}
+.ts-dial-face img{position:absolute;width:114%;height:114%;max-width:none;left:-6.9091%;top:-6.3636%;object-fit:fill;pointer-events:none}
+.ts-disc-plane{position:absolute;left:17.9558%;top:5.1565%;width:49.033%;aspect-ratio:1;z-index:1;pointer-events:none}
+.ts-disc-projector{position:absolute;inset:0;transform-origin:50% 50%;transform:matrix3d(1,0,0,0,0,.89014,0,-.00010237,0,0,1,0,0,0,0,1)}
+.ts-minimal .tp-vinyl-rotor{position:absolute;inset:0;aspect-ratio:1;border-radius:50%;overflow:hidden;transform-origin:50% 50%;animation:none!important;will-change:transform}
+.ts-minimal .tp-vinyl-rotor>img{position:absolute;width:106.2712%;height:106.2712%;left:-3.0508%;top:-2.2034%;max-width:none;object-fit:fill;pointer-events:none}
+.ts-minimal .ts-disc-touch{position:absolute;left:17.9558%;top:9.6685%;width:49.033%;height:59.024%;border:0;background:none;border-radius:50%;z-index:3;cursor:grab;touch-action:none}
+.ts-minimal .ts-disc-touch:active{cursor:grabbing}.ts-disc-touch:focus-visible{outline:2px solid #ed5439;outline-offset:-10px}
+.ts-expression-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4;overflow:visible}.ts-expression-svg image{pointer-events:none}
+[data-session-arm-body]{transition:transform 180ms ease-out;filter:drop-shadow(1px 2px 1px #0002)}.is-sweeping [data-session-arm-body]{transition:none}
+.ts-arm-grab{pointer-events:all;cursor:grab;touch-action:none;outline:none}.ts-arm-grab:focus-visible{stroke:#ed5439;stroke-width:3;stroke-dasharray:5 5}
+.ts-device-display{position:absolute;left:79.213%;top:64.088%;width:5.11%;height:4.15%;z-index:6;background:#080a07;color:#ffbe46;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;container-type:inline-size;font-family:Mono,monospace;line-height:1.15;pointer-events:none;text-align:center;border-radius:3px;text-shadow:0 0 2px #ef9e3544;box-shadow:inset 0 0 5px #000}
+.ts-display-main{font-size:28cqw;letter-spacing:.04em;max-width:96%;white-space:nowrap;overflow:hidden}.ts-device-display.is-menu .ts-display-main{font-size:15cqw;letter-spacing:0}.ts-display-sub{font-size:10cqw;letter-spacing:0;white-space:nowrap;max-width:96%;overflow:hidden}.ts-display-progress{position:absolute;left:8%;right:8%;bottom:4%;height:1px;background:#ffbe4620}.ts-display-progress i{display:block;height:100%;background:#ffbe46;width:0}.is-recording .ts-device-display{color:#ffa452}
+.ts-volume-wheel,.ts-power{position:absolute;z-index:5;cursor:pointer;background:transparent;border:0;padding:0;border-radius:30%;touch-action:none}.ts-volume-wheel{cursor:ns-resize}.ts-power{border-radius:50%}
+.ts-minimal.is-off .ts-device-display{color:#4b4a2e;text-shadow:none}.ts-minimal.is-off .ts-display-progress{opacity:0}
+.ts-inspect-options{display:flex;gap:6px}.ts-inspect-options button{font:9px Mono,monospace;padding:10px 13px;min-height:40px;border:1px solid #20201e55;border-radius:24px;background:#eee9dc;color:#20201e;white-space:nowrap;cursor:pointer}.ts-inspect-options button[aria-pressed=true]{border-color:#20201e;background:#e0dbce}
+.ts-minimal.is-close .tp-product-visual{transform:scale(2.15);transform-origin:87% 56%}.ts-minimal.is-close[data-inspect=tracks] .tp-product-visual{transform:scale(2.15);transform-origin:51% 80%}
+.ts-use-note{font:9px/1.6 Mono,monospace!important;color:#656358;margin:12px 13% 0 15%;max-width:70%;text-align:left}
+.ts-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.tp-living>div{max-width:44%;z-index:1}.tp-living:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#16120d66,transparent 70%);pointer-events:none}
+.ts-control-instructions{display:grid;grid-template-columns:1fr;gap:0;max-width:370px;margin:28px 0 22px}.ts-control-instructions div{padding:13px 0;border-top:1px solid #20201e33}.ts-control-instructions dt{font:10px Mono,monospace;margin-bottom:5px;color:#2544db}.ts-control-instructions dd{margin:0;font-size:13px;line-height:1.5}.tp-control-copy .ts-small-note{font:10px/1.7 Mono,monospace;max-width:370px}
+@media(max-width:700px){.ts-use-note{font-size:8px!important;margin-inline:12%;max-width:76%}.ts-inspect-options{gap:4px}.ts-inspect-options button{font-size:8px;padding:8px 10px;min-height:44px}.tp-product-caption>span{max-width:90px}.ts-minimal.is-close .tp-viewfinder{aspect-ratio:1}.ts-minimal.is-close .tp-product-visual{transform:translateY(13%) scale(3.7);transform-origin:86% 57%}.ts-minimal.is-close[data-inspect=tracks] .tp-product-visual{transform:translateY(-1%) scale(2.4);transform-origin:48% 79%}.tp-living>div{max-width:85%}.tp-living>img{object-position:68% center}.tp-living:after{background:linear-gradient(transparent 40%,#16120d99)}}
+@media(prefers-reduced-motion:reduce){.ts-dial-face,[data-session-arm-body],.ts-physical-key .ts-photo-crop{transition:none}}
+
+.ts-main-dial .ts-face-projection{transform:scaleY(.90140845)}
+/* Clipping must not create scroll containers: focusing a photographed part must never pan the camera. */
+.p-tape main,.ts-minimal .tp-viewfinder{overflow:clip}
+.ts-minimal.is-close .tp-product-visual{transform:scale(2);transform-origin:87% 50%}
+@media(max-width:700px){
+ .ts-minimal.is-close .tp-viewfinder{aspect-ratio:.86}
+ .ts-minimal.is-close .tp-product-visual{transform:translateY(39%) scale(3.2);transform-origin:86% 57%}
+ .ts-minimal.is-close[data-inspect=tracks] .tp-viewfinder{aspect-ratio:1.25}
+ .ts-minimal.is-close[data-inspect=tracks] .tp-product-visual{transform:translateY(-10%) scale(1.8);transform-origin:48% 79%}
+ .ts-layer-dial:before{content:'';position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%);border-radius:50%;background:transparent}
+}

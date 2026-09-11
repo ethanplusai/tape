@@ -1,0 +1,248 @@
+{
+  "asOf": "2026-09-10",
+  "currency": "USD",
+  "status": "Planning estimates. No supplier quotations. Excludes sales tax and customer delivery.",
+  "quantities": [
+    100,
+    500,
+    1000
+  ],
+  "price": 1999,
+  "fees": 0.1,
+  "supportReserve": 0.03,
+  "contingency": 0.2,
+  "quantityFactors": {
+    "100": 1.35,
+    "500": 1,
+    "1000": 0.87
+  },
+  "components": [
+    {
+      "item": "CM5 2 GB / 16 GB eMMC / no radio (CM5002016)",
+      "low": 92.5,
+      "base": 92.5,
+      "high": 110,
+      "scalable": false,
+      "basis": "Current official Rev 8 list price for low/base; high is volatility allowance",
+      "source": "https://pip-assets.raspberrypi.com/categories/944-raspberry-pi-compute-module-5/documents/RP-008181-DS-8-cm5-product-brief.pdf"
+    },
+    {
+      "item": "XMOS USB audio bridge and clocking",
+      "low": 12,
+      "base": 18,
+      "high": 28
+    },
+    {
+      "item": "Multichannel codec",
+      "low": 12,
+      "base": 17,
+      "high": 25
+    },
+    {
+      "item": "Analog input/output stages, phantom power and connectors",
+      "low": 20,
+      "base": 29,
+      "high": 46
+    },
+    {
+      "item": "USB-C PD, power rails and protection",
+      "low": 12,
+      "base": 17,
+      "high": 28
+    },
+    {
+      "item": "Control MCU, watchdog and ESD",
+      "low": 7,
+      "base": 12,
+      "high": 18
+    },
+    {
+      "item": "Five push encoders and output wheel",
+      "low": 8,
+      "base": 12,
+      "high": 22
+    },
+    {
+      "item": "Amber display and mounting",
+      "low": 5,
+      "base": 7,
+      "high": 12
+    },
+    {
+      "item": "Disc touch and disc/arm angle sensing",
+      "low": 9,
+      "base": 13,
+      "high": 22
+    },
+    {
+      "item": "Carrier/control/audio PCBs, SMT assembly and interconnect",
+      "low": 18,
+      "base": 25,
+      "high": 42
+    },
+    {
+      "item": "Low-speed motor and driver",
+      "low": 28,
+      "base": 42,
+      "high": 75
+    },
+    {
+      "item": "Spindle, bearings and isolation",
+      "low": 12,
+      "base": 18,
+      "high": 32
+    },
+    {
+      "item": "Performance disc assembly",
+      "low": 17,
+      "base": 25,
+      "high": 40
+    },
+    {
+      "item": "Arm, pivot, damping and red grip",
+      "low": 15,
+      "base": 22,
+      "high": 40
+    },
+    {
+      "item": "Machined aluminum upper shell and finish",
+      "low": 50,
+      "base": 72,
+      "high": 115
+    },
+    {
+      "item": "Formed coated steel base",
+      "low": 16,
+      "base": 24,
+      "high": 40
+    },
+    {
+      "item": "Machined aluminum knobs",
+      "low": 9,
+      "base": 14,
+      "high": 22
+    },
+    {
+      "item": "PBT keycaps, switches and guide",
+      "low": 6,
+      "base": 9,
+      "high": 18
+    },
+    {
+      "item": "Fasteners, thermal interface and heat spreader",
+      "low": 5,
+      "base": 9,
+      "high": 17
+    },
+    {
+      "item": "Feet, wiring and gaskets",
+      "low": 8,
+      "base": 15,
+      "high": 25
+    },
+    {
+      "item": "Certified external supply and cable",
+      "low": 17,
+      "base": 23,
+      "high": 35,
+      "scalable": false
+    },
+    {
+      "item": "Retail packaging and protective inserts",
+      "low": 12,
+      "base": 18,
+      "high": 29
+    }
+  ],
+  "factoryLabor": {
+    "low": 25,
+    "base": 42,
+    "high": 70
+  },
+  "scrapRate": {
+    "low": 0.03,
+    "base": 0.05,
+    "high": 0.09
+  },
+  "inboundFreight": {
+    "low": 10,
+    "base": 18,
+    "high": 32
+  },
+  "dutyReserve": {
+    "low": 0,
+    "base": 0.05,
+    "high": 0.2
+  },
+  "nre": [
+    {
+      "item": "Firmware, audio DSP, UI, storage and integration",
+      "hours": 1000,
+      "hourlyRate": 120,
+      "low": 80000,
+      "high": 190000
+    },
+    {
+      "item": "Electrical design, layout and bring-up",
+      "hours": 350,
+      "hourlyRate": 130,
+      "low": 30000,
+      "high": 75000
+    },
+    {
+      "item": "Mechanical engineering and DFM",
+      "hours": 300,
+      "hourlyRate": 120,
+      "low": 24000,
+      "high": 60000
+    },
+    {
+      "item": "Industrial design and production CMF detailing",
+      "hours": 150,
+      "hourlyRate": 100,
+      "low": 10000,
+      "high": 25000
+    },
+    {
+      "item": "Prototype units and two board/mechanical revisions",
+      "base": 20000,
+      "low": 12000,
+      "high": 40000
+    },
+    {
+      "item": "Factory fixtures, programming and test development",
+      "base": 12000,
+      "low": 8000,
+      "high": 22000
+    },
+    {
+      "item": "US compliance lab, pre-scan and retest allowance",
+      "base": 18000,
+      "low": 12000,
+      "high": 35000
+    },
+    {
+      "item": "Soft tooling, keycaps, jigs and finish samples",
+      "base": 8000,
+      "low": 5000,
+      "high": 18000
+    }
+  ],
+  "launchOperations": {
+    "low": 20000,
+    "base": 30000,
+    "high": 50000
+  },
+  "notes": [
+    "Unspecified rows are engineering allowances at 500 units, not vendor prices.",
+    "The volume factor applies to scalable component rows and factory labor, not fixed NRE. It is an assumption to test with quotes.",
+    "Factory labor covers final assembly, functional test and packing; board SMT assembly is included separately in the PCB row.",
+    "Scrap is applied as yield loss, dividing hardware plus labor by 1 minus scrap rate.",
+    "Duty is a sensitivity reserve on ex-factory value, not a tariff classification or asserted legal rate. Country and classification require confirmation.",
+    "Inbound freight is per good unit to the fulfillment warehouse. Customer delivery and sales tax are outside this model.",
+    "Three percent of gross receipts is reserved for support, returns and replacement handling; initial factory rejects are separately covered by yield.",
+    "Twenty percent contingency covers production cash, NRE and launch operations. It is additional to each scenario's allowances.",
+    "Funding covers the entire batch, not merely the first prototype. No unfunded future retail sales are used to close a gap.",
+    "All scenarios assume the planned batch sells at the stated price. No demand validation has been performed."
+  ]
+}
