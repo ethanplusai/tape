@@ -1,0 +1,7 @@
+.git
+node_modules
+dist
+test-results
+.env*
+*.tape
+*.wav
