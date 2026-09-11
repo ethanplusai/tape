@@ -1,5 +1,7 @@
 # Play TAPE in your browser
 
+Choose **Learn the controls** in the header for a photographic guide to playback, recording, layers, tempo, the disc, the arm, loop setup, base sounds and saved sessions. **Find this on the deck** brings you to the matching physical control or menu in the hero. This navigation never starts audio or changes recorded layers. During a take, it brings you back to the deck without changing its view or menu.
+
 All musical controls are on the deck. Layer 2 is selected on arrival so you can record over the base on layer 1. Use **Inspect controls** for the right rail or **Layers** for the front row.
 
 | Control | Gesture | Result |
@@ -44,3 +46,5 @@ The AudioWorklet runs the same `TapeCore` exercised by PCM tests. One sample clo
 Tempo is varispeed: speed and pitch change together. There is no pitch-preserving time stretch, stereo capture, sample import, tap tempo, audio-device picker, latency compensation or live monitoring. A stereo input is downmixed to mono. Microphone/browser/device latency still needs physical-device testing. The browser demo does not prove motor feel, arm clearance, sensor accuracy, electronics or manufacturing feasibility.
 
 Audio requires HTTPS or localhost and AudioWorklet support. Nothing plays or requests a microphone before a user action. Reduced-motion preferences and Pause motion stop automatic disc animation; Play/Pause separately controls sound.
+
+If sound does not start, the page displays an error beneath the hero actions. A fresh Play tap retries audio startup. Browser interruptions pause playback and release the mic; return to the page and press Play to resume. The [browser audio notes](browser-audio.md) document the startup behavior and device-validation limits.

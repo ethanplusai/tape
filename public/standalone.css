@@ -18,3 +18,18 @@
 .p-tape [data-tape-deck].is-pointer-input :focus-visible{outline:none;stroke:none}
 .p-tape .tp-control-copy .ts-small-note{font:10px/1.7 Mono,monospace;max-width:370px}
 @media(max-width:600px){.tp-hero .tp-edition{display:none}.tp-hero-actions{flex-direction:row;align-items:center;gap:20px}}
+/* Centre the composition within a deliberate page gutter on wide screens. */
+.p-tape .tp-hero{max-width:1700px;margin-inline:auto;padding:28px clamp(24px,5vw,80px) 22px;grid-template-columns:36% 64%}
+.p-tape .tp-product-caption{justify-content:flex-end}
+.p-tape .p-nav .built-by{white-space:nowrap!important;max-width:none;flex-shrink:0}
+.p-tape .tp-hero-heading .tp-audio-notice{font:12px/1.5 DM;max-width:32ch;padding:10px 0;color:#2544db}
+.p-tape [hidden]{display:none!important}
+@media(max-width:600px){
+ .p-tape .tp-hero{padding:25px 5% 20px}
+ .p-tape .p-nav{gap:10px;padding-inline:5%}
+ .p-tape .p-logo .tape-wordmark{width:78px!important;height:24px!important}
+ .p-tape .p-nav .nav-right{gap:12px}
+ .p-tape .p-nav .built-by{font-size:10px;line-height:1}
+ .p-tape .p-nav-cta{white-space:nowrap;padding:11px 12px;font-size:10px}
+}
+@media(max-width:350px){.p-tape .p-logo .tape-wordmark{width:67px!important}.p-tape .p-nav .nav-right{gap:9px}.p-tape .p-nav-cta{padding-inline:9px}}

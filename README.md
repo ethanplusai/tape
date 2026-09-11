@@ -28,6 +28,8 @@ Open **http://127.0.0.1:4293**. Audio requires HTTPS or localhost. There are no 
 6. Drag the disc in either direction to scrub a layer. Sweep the arm inward to filter it. Release the disc to rejoin the timeline.
 7. **SESSION → SAVE** downloads an editable `.tape` project. **EXPORT** downloads a mixed WAV. Save before reloading.
 
+**Learn the controls** opens a nine-part photographic guide. Choose a feature, then **Find this on the deck** to enlarge its control or open its menu in the hero. Browsing the guide never starts audio, requests the mic or changes your recordings.
+
 Use **Inspect controls** and **Layers** to enlarge the product. Keyboard users can Tab to controls, use arrows to turn, Enter to press and Shift+Enter to hold. [Complete controls and limitations](docs/controls.md).
 
 ## Privacy
@@ -45,7 +47,10 @@ npm run build
 npx playwright install chromium
 # In another terminal: npm start
 npm run test:browser
+npm run test:guide
 ```
+
+Audio startup tests cover gesture timing and cancelled microphone permission. The guide suite checks every feature link, narrow-screen layout, motion controls and deliberately delayed processor loading. See [browser audio validation](docs/browser-audio.md) for Safari coverage and its limits.
 
 DSP tests measure PCM capture, overdub/undo, tempo, amplitude, reverse, filtering and scrubbing. Project tests validate round-tripping and malformed input. Browser tests use a **synthetic microphone**, real pointer/touch interactions and the actual AudioWorklet, and write ignored screenshots to `test-results/`.
 

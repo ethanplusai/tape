@@ -1,0 +1,8 @@
+// A teaching illustration, not a meter pretending to show live microphone data.
+function wave(kind){let d='';for(let i=0;i<=520;i+=2){const x=i/520,t=x*8;let env,y;
+ if(kind===0){env=Math.exp(-(t%1)*10)*.9+.09;y=Math.sin(t*70)*env;}
+ else if(kind===1){env=Math.max(0,Math.sin(t*2.3))*.7+.04;y=(Math.sin(t*31)+.4*Math.sin(t*59))*env*.7;}
+ else if(kind===2){env=Math.min(1,(t%2)*9)*Math.exp(-(t%2)*1.4);y=Math.sin(t*24)*env;}
+ else {env=.22+.2*Math.sin(t*1.2)**2;y=(Math.sin(t*23)+Math.sin(t*34)*.5)*env;}
+ d+=`${i?'L':'M'}${i},${(30+y*24).toFixed(2)}`;}return d;}
+export function loopVisual(){const paths=[0,1,2,3].map(wave);return `<figure class="tw-panel" data-loop-visual aria-label="Illustration: a rhythm, a phrase, a bass line and a harmony repeat as four layers in one loop."><div class="tw-top"><span>THE ANATOMY OF A LOOP</span><span class="tw-count">4 LAYERS / ∞ IDEAS</span></div><div class="tw-score"><div class="tw-ruler" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span></div>${['A rhythm','A phrase','A bass line','A harmony'].map((name,i)=>`<div class="tw-track" style="--track:${i}"><div class="tw-track-label"><span>0${i+1}</span><b>${name}</b></div><div class="tw-track-wave"><svg viewBox="0 0 520 60" preserveAspectRatio="none" aria-hidden="true"><path d="${paths[i]}"/></svg></div></div>`).join('')}<div class="tw-playhead" aria-hidden="true"><i></i></div></div><div class="tw-sum"><div><span>TOGETHER</span><b>Your loop.</b></div><svg viewBox="0 0 520 60" preserveAspectRatio="none" aria-hidden="true">${paths.map((p,i)=>`<path d="${p}" style="--track:${i}"/>`).join('')}</svg></div><figcaption>One idea repeats. Each new layer gives it somewhere to go.</figcaption></figure>`;}
