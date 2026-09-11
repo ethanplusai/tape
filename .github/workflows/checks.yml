@@ -24,3 +24,4 @@ jobs:
           node -e 'const wait=async()=>{for(let i=0;i<30;i++){try{if((await fetch("http://127.0.0.1:4293")).ok)return;}catch{}await new Promise(r=>setTimeout(r,200));}process.exit(1)};wait()'
           npm run test:browser
           npm run test:guide
+          npm run test:library

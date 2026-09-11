@@ -1,4 +1,5 @@
 // Local, versioned four-layer session format. No remote storage or executable content.
+import {isLibrarySound} from './library.mjs';
 const MAGIC='TAPE0001',LIMIT=64*1024*1024;
 const number=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
 const validSettings=s=>({takeBeats:[0,4,8,16].includes(s?.takeBeats)?s.takeBeats:8,countIn:!!s?.countIn,click:!!s?.click,inputGain:number(s?.inputGain,0,2)?s.inputGain:1,selected:Number.isInteger(s?.selected)&&s.selected>=0&&s.selected<4?s.selected:0});
@@ -20,7 +21,7 @@ export function decodeProject(buffer,targetRate){
   let samples=null;
   if(t.frames){const raw=new Float32Array(t.frames);for(let n=0;n<t.frames;n++){const value=view.getFloat32(at,true);at+=4;if(!number(value,-1,1))throw Error('The session contains invalid samples.');raw[n]=value;}
    if(meta.sampleRate===targetRate)samples=raw;else{samples=new Float32Array(Math.max(1,Math.round(raw.length*targetRate/meta.sampleRate)));for(let n=0;n<samples.length;n++){const p=n*raw.length/samples.length,i=Math.floor(p),f=p-i;samples[n]=raw[i]*(1-f)+raw[(i+1)%raw.length]*f;}}
-  }return {samples,source:samples?(['dust','pulse','half','warm'].includes(t.source)?t.source:'custom'):null,beats:t.beats,level:t.level,muted:t.muted,reverse:t.reverse,filter:t.filter};
+  }return {samples,source:samples?((['dust','pulse','half','warm'].includes(t.source)||isLibrarySound(t.source))?t.source:'custom'):null,beats:t.beats,level:t.level,muted:t.muted,reverse:t.reverse,filter:t.filter};
  });
  if(at!==bytes.length)throw Error('The session file has unexpected data.');
  return {state:{sampleRate:targetRate,bpm:meta.bpm,master:meta.master,tracks},settings:validSettings(meta.settings)};

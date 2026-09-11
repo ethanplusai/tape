@@ -1,10 +1,10 @@
-import {presets} from './tape-audio/presets.mjs';
+import {groups,findSound,defaultSound} from './tape-audio/library.mjs';
 import {TapeEngine} from './tape-audio/engine.js';
 const deck=document.querySelector('[data-tape-deck]');
 if(deck){
  const engine=new TapeEngine(),all=s=>[...deck.querySelectorAll(s)],one=s=>deck.querySelector(s),root=document.documentElement,media=matchMedia('(prefers-reduced-motion: reduce)');
  const state={selected:1,bpm:96,beat:0,playing:false,recording:null,tracks:Array.from({length:4},()=>({hasAudio:false,level:.75,filter:0,muted:false,reverse:false,canUndo:false,canRedo:false,takes:0,beats:8}))};
- let idleSpin=true,baseChoice='dust';
+ let idleSpin=true,baseChoice=defaultSound;
  let master=.7,inputGain=1,takeBeats=8,countIn=false,click=false,power=true,permission=false,busy=false,hydrated=false,mic=false,recordRequest=0;
  let actual=0,angle=0,last=0,frame=0,held=false,discDrag,keyboardRelease,flash=null,flashTimer,menu=null;
  const rotor=one('.tp-vinyl-rotor'),main=one('[data-session-bpm]'),display=one('[data-session-display]'),disc=one('[data-session-disc]');
@@ -12,11 +12,11 @@ if(deck){
  const send=(type,value,index=state.selected)=>engine.send({type,value,index});
  function announce(text,short,sub=''){one('[data-session-status]').textContent=text;if(short){clearTimeout(flashTimer);flash={main:short,sub};flashTimer=setTimeout(()=>{flash=null;renderDisplay();},1700);}renderDisplay();}
  function failure(e){permission=false;busy=false;const notice=document.querySelector('[data-audio-notice]');if(notice){notice.hidden=false;notice.textContent=e.message||'Tap Play again to start audio.';}announce(e.message||'Audio could not start. Please retry.','RETRY','CHECK BROWSER');render();}
- async function ready(){const prefs={bpm:state.bpm,base:baseChoice,tracks:state.tracks.map(t=>({...t}))};await engine.init();const notice=document.querySelector('[data-audio-notice]');if(notice)notice.hidden=true;if(!hydrated){hydrated=true;if(prefs.base!=='off')await engine.base(prefs.base,prefs.bpm);send('tempo',prefs.bpm);send('master',master);send('input',inputGain);send('click',click);prefs.tracks.forEach((t,index)=>{for(const type of ['level','filter','mute','reverse'])send(type,type==='mute'?t.muted:t[type],index);});}}
+ async function ready(){const prefs={bpm:state.bpm,base:baseChoice,tracks:state.tracks.map(t=>({...t}))};await engine.init();const notice=document.querySelector('[data-audio-notice]');if(notice)notice.hidden=true;if(!hydrated){hydrated=true;if(prefs.base!=='off')await engine.sound(0,prefs.base,false);send('tempo',prefs.bpm);send('master',master);send('input',inputGain);send('click',click);prefs.tracks.forEach((t,index)=>{for(const type of ['level','filter','mute','reverse'])send(type,type==='mute'?t.muted:t[type],index);});}}
  function press(el){el.classList.add('is-pressed');setTimeout(()=>el.classList.remove('is-pressed'),140);}
  function renderDisplay(){
-  const t=track(),r=state.recording;let context='',text=String(state.bpm).padStart(3,'0'),sub=`L${state.selected+1} / ${t.muted?'MUTE':t.reverse?'REV':t.hasAudio?(state.playing?'PLAY':'PAUSE'):'EMPTY'}`;
-  if(!power){text='';sub='STANDBY';}else if(permission){text='MIC?';sub='ALLOW / CANCEL';}else if(r){text=r.phase==='armed'?String(Math.ceil(r.remaining)):r.free?`${r.seconds.toFixed(1)}s`:'REC';sub=`L${r.index+1} / ${r.phase==='armed'?'COUNT IN':'RECORDING'}`;}else if(menu){const m=menuView();text=m.main;sub=m.sub;context=menu.kind==='list'?`${menu.id} ${menu.index+1}/${menu.items.length}`:menu.kind==='value'?'TURN TO CHANGE':'PLEASE CONFIRM';}else if(flash){text=flash.main;sub=flash.sub;}else if(!state.tracks.some(t=>t.hasAudio)&&!state.playing)sub='PRESS PLAY';
+  const t=track(),r=state.recording,pending=state.tracks.findIndex(t=>t.queuedSource);let context='',text=String(state.bpm).padStart(3,'0'),sub=`L${state.selected+1} / ${t.muted?'MUTE':t.reverse?'REV':t.hasAudio?(state.playing?'PLAY':'PAUSE'):'EMPTY'}`;
+  if(!power){text='';sub='STANDBY';}else if(permission){text='MIC?';sub='ALLOW / CANCEL';}else if(r){text=r.phase==='armed'?String(Math.ceil(r.remaining)):r.free?`${r.seconds.toFixed(1)}s`:'REC';sub=`L${r.index+1} / ${r.phase==='armed'?'COUNT IN':'RECORDING'}`;}else if(menu){const m=menuView();text=m.main;sub=m.sub;context=menu.kind==='list'?`${menu.layer!==undefined?'L'+(menu.layer+1)+' ':''}${menu.id} ${menu.index+1}/${menu.items.length}`:menu.kind==='value'?'TURN TO CHANGE':'PLEASE CONFIRM';}else if(pending>=0){text='QUEUED';sub=`L${pending+1} / NEXT BAR`;}else if(flash){text=flash.main;sub=flash.sub;}else if(!state.tracks.some(t=>t.hasAudio)&&!state.playing)sub='PRESS PLAY';
   display.classList.toggle('is-menu',!/^\d{3}$/.test(text));one('[data-session-display-context]').textContent=context;one('[data-session-display-main]').textContent=text;one('[data-session-display-sub]').textContent=sub;
   display.setAttribute('aria-label',`Deck: ${text}, ${sub}`);display.title=one('[data-session-status]').textContent;
   one('[data-session-progress]').style.width=`${r?.phase==='recording'?r.progress*100:state.playing?((state.beat%t.beats+t.beats)%t.beats)/t.beats*100:0}%`;
@@ -25,11 +25,11 @@ if(deck){
  function render(){
   const t=track(),recording=permission||!!state.recording;
   deck.classList.toggle('is-playing',state.playing);deck.classList.toggle('is-recording',recording);deck.classList.toggle('is-off',!power);
-  Object.assign(deck.dataset,{selectedLayer:state.selected+1,filter:Math.round(t.filter*100),bpm:state.bpm,playing:String(state.playing),recording:permission?'permission':state.recording?.phase||'idle',outputRms:(state.outputRms||0).toFixed(5),inputRms:(state.inputRms||0).toFixed(5),mic:String(mic),tracks:state.tracks.map(t=>t.hasAudio?'1':'0').join(''),takeBeats,baseSound:baseChoice,muted:String(t.muted),reverse:String(t.reverse),master});
+  Object.assign(deck.dataset,{selectedLayer:state.selected+1,filter:Math.round(t.filter*100),bpm:state.bpm,playing:String(state.playing),recording:permission?'permission':state.recording?.phase||'idle',outputRms:(state.outputRms||0).toFixed(5),inputRms:(state.inputRms||0).toFixed(5),mic:String(mic),tracks:state.tracks.map(t=>t.hasAudio?'1':'0').join(''),takeBeats,baseSound:baseChoice,sources:state.tracks.map(t=>t.source||'off').join(','),queued:state.tracks.map(t=>t.queuedSource||'').join(','),muted:String(t.muted),reverse:String(t.reverse),master});
   all('[data-session-record],[data-session-play],[data-session-undo]').forEach(b=>b.disabled=!power||busy||(b.hasAttribute('data-session-undo')&&locked()));
-  one('[data-session-play]').setAttribute('aria-pressed',String(state.playing));one('[data-session-play]').setAttribute('aria-label',state.playing?'Pause; hold to stop and rewind':'Play the selected base sound and your recorded layers');
+  one('[data-session-play]').setAttribute('aria-pressed',String(state.playing));one('[data-session-play]').setAttribute('aria-label',state.playing?'Pause; hold to stop and rewind':'Play the library sounds and your recorded layers');
   one('[data-session-record]').setAttribute('aria-pressed',String(recording));one('[data-session-record]').setAttribute('aria-label',permission?'Cancel microphone request':state.recording?'Finish this take':'Record microphone into selected layer');
-  all('[data-session-level]').forEach(el=>{const i=Number(el.dataset.sessionLevel),t=state.tracks[i],value=Math.round(t.level*100);el.style.setProperty('--dial-angle',`${(value-75)*2.5}deg`);el.setAttribute('aria-valuenow',value);el.setAttribute('aria-valuetext',`${value} percent, ${i===state.selected?'selected, ':''}${t.muted?'muted, ':''}${t.hasAudio?'recorded':'empty'}`);el.dataset.selected=String(i===state.selected);el.setAttribute('aria-disabled',String(!power));});
+  all('[data-session-level]').forEach(el=>{const i=Number(el.dataset.sessionLevel),t=state.tracks[i],value=Math.round(t.level*100);el.style.setProperty('--dial-angle',`${(value-75)*2.5}deg`);el.setAttribute('aria-valuenow',value);el.setAttribute('aria-valuetext',`${value} percent, ${i===state.selected?'selected, ':''}${t.muted?'muted, ':''}${findSound(t.source)?.label|| (t.hasAudio?'recorded':'empty')}`);el.dataset.selected=String(i===state.selected);el.setAttribute('aria-disabled',String(!power));});
   main.style.setProperty('--dial-angle',`${menu?menu.turn||0:(state.bpm-96)*1.5}deg`);main.setAttribute('aria-disabled',String(!power||locked()));main.setAttribute('aria-valuenow',menu?menu.kind==='list'?menu.index:menu.kind==='value'?menu.value:0:state.bpm);main.setAttribute('aria-valuemin',menu?0:40);main.setAttribute('aria-valuemax',menu?menu.kind==='list'?menu.items.length-1:menu.max||100:240);main.setAttribute('aria-valuetext',menu?`${menuView().main}, ${menuView().sub}`:`${state.bpm} BPM; press for settings`);
   const filter=Math.round(t.filter*100);one('[data-session-arm]').setAttribute('aria-valuenow',filter);one('[data-session-arm]').setAttribute('aria-valuetext',filter?`${filter} percent filter, layer ${state.selected+1}`:'Filter bypassed');one('[data-session-arm-body]').setAttribute('transform',`rotate(${filter*.18} 1043 216)`);
   one('[data-session-master]').setAttribute('aria-valuenow',Math.round(master*100));one('[data-session-power]').setAttribute('aria-pressed',String(power));renderDisplay();
@@ -46,11 +46,21 @@ if(deck){
  function menuView(){if(menu.kind==='list')return {main:menu.items[menu.index].label,sub:menu.items[menu.index].sub};if(menu.kind==='value')return {main:menu.format(menu.value),sub:menu.label};return {main:menu.index?'CONFIRM':'CANCEL',sub:menu.label};}
  function moveMenu(delta){if(!menu)return;menu.turn=(menu.turn||0)+delta*12;if(menu.kind==='list')menu.index=(menu.index+delta%menu.items.length+menu.items.length)%menu.items.length;else if(menu.kind==='value'){menu.value=clamp(menu.value+delta*menu.step,menu.min,menu.max);menu.set(menu.value);}else menu.index=delta>0?1:0;render();}
  async function task(fn,message,short){if(locked())return;busy=true;render();try{await ready();await fn();closeMenu();announce(message,short);}catch(e){failure(e);}finally{busy=false;render();}}
- function soundMenu(){const parent=menu;list('SOUND',[...presets.map(p=>item(p.label,()=>changeBase(p.id),({dust:'SWUNG RHYTHM',pulse:'FOUR ON FLOOR',half:'HALF-TIME',warm:'SOFT NOTES'})[p.id])),item('OFF',()=>changeBase('off'),'NO BASE SOUND'),item('BACK',back)],parent);}
- function changeBase(id){const apply=()=>task(async()=>{await engine.base(id,state.bpm);baseChoice=id;},id==='off'?'Base sound off. Your other layers are unchanged.':`Layer 1: ${id}. Your other layers are unchanged.`,id==='off'?'BASE OFF':id.toUpperCase());if(state.tracks[0].hasAudio&&state.tracks[0].source==='custom')confirm('REPLACE L1',apply);else apply();}
+ function soundMenu(){
+  const parent=menu,index=state.selected;
+  list('SOUND',[...groups.map(g=>item(g.label,()=>{
+   const parent=menu;list(g.label,[...g.sounds.map(([id,label,description])=>item(label,()=>changeSound(index,`room-${id}`),description)),item('BACK',back)],parent);menu.layer=index;
+   const active=g.sounds.findIndex(([id])=>`room-${id}`===state.tracks[index].source);menu.index=Math.max(0,active);render();
+  },`L${index+1} / ROOM 01`)),item('OFF',()=>changeSound(index,'off'),`EMPTY LAYER ${index+1}`),item('BACK',back)],parent);
+  menu.layer=index;const group=findSound(state.tracks[index].source)?.group||groups[index].id;menu.index=groups.findIndex(g=>g.id===group);render();
+ }
+ function changeSound(index,id){
+  const apply=()=>task(()=>engine.sound(index,id),state.playing?`Layer ${index+1} changes at the next bar. Undo cancels a queued change.`:`Layer ${index+1}: ${findSound(id)?.label||'off'}. Press Play to hear your layers.`,state.playing?'QUEUED':findSound(id)?.label||'OFF');
+  if(state.tracks[index].hasAudio&&state.tracks[index].source==='custom')confirm(`REPLACE L${index+1}`,apply);else apply();
+ }
  function openMenu(){if(!power||locked())return;if(menu){if(menu.kind==='list')menu.items[menu.index].action();else if(menu.kind==='value')back();else{const m=menu;back();if(m.index)m.action();}return;}
   list('MAIN',[
-   item('SOUND',soundMenu,'LAYER 1 BASE'),
+   item('SOUND',soundMenu,`LAYER ${state.selected+1} LIBRARY`),
    item('LOOP',()=>{const parent=menu;list('LOOP',[
     item('LENGTH',()=>{if(track().hasAudio){closeMenu();announce('An existing layer keeps its recorded length. Clear it or select an empty layer to choose a new length.','FIXED','RECORDED LOOP');return;}const options=[0,4,8,16];value('TAKE LENGTH',options.indexOf(takeBeats),0,3,v=>{takeBeats=options[v];},v=>v===0?'FREE':`${options[v]/4} BAR${v>1?'S':''}`);}),
     item('COUNT IN',()=>value('COUNT IN',Number(countIn),0,1,v=>{countIn=!!v;},v=>v?'ON':'OFF')),
@@ -64,7 +74,7 @@ if(deck){
     item('LOAD',()=>confirm('REPLACE SESSION',()=>one('[data-session-project-file]').click()),'OPEN .TAPE FILE'),
     item('EXPORT',()=>task(()=>engine.download(),'Your mix was downloaded as a WAV file.','EXPORTED'),'MIXED WAV FILE'),
     item('CLEAR',()=>confirm(`CLEAR L${state.selected+1}`,()=>{engine.send({type:'clear',index:state.selected});closeMenu();announce('Layer cleared. Undo restores it.','CLEARED',`LAYER ${state.selected+1}`);}),'SELECTED LAYER'),
-    item('NEW',()=>confirm('NEW SESSION',()=>{engine.pause();engine.send({type:'new'});state.tracks.forEach(t=>Object.assign(t,{hasAudio:false,level:.75,filter:0,muted:false,reverse:false}));state.playing=false;state.selected=0;baseChoice='off';closeMenu();announce('New empty session. Choose a base sound from the main dial or record your own.','NEW','EMPTY SESSION');}),'CLEAR ALL FOUR'),
+    item('NEW',()=>confirm('NEW SESSION',()=>{engine.pause();engine.send({type:'new'});state.tracks.forEach(t=>Object.assign(t,{hasAudio:false,level:.75,filter:0,muted:false,reverse:false}));state.playing=false;state.selected=0;baseChoice='off';closeMenu();announce('New empty session. Choose sounds from the main dial or record your own.','NEW','EMPTY SESSION');}),'CLEAR ALL FOUR'),
     item('BACK',back)
    ],parent);}),
    item('HELP',()=>{const parent=menu;list('HELP',[
@@ -74,7 +84,7 @@ if(deck){
  }
  function setTempo(v){if(locked()||!power)return;state.bpm=Math.round(clamp(v,40,240));send('tempo',state.bpm);render();announce(`Tempo ${state.bpm} BPM.`);}
  function setLevel(index,v){if(!power)return;const value=Math.round(clamp(v,0,100));state.tracks[index].level=value/100;send('level',value/100,index);render();announce(`Layer ${index+1}, volume ${value} percent.`,`L${index+1} ${value}%`,'LAYER LEVEL');}
- function select(index){if(locked()||held||!power)return;state.selected=index;render();announce(`Layer ${index+1} selected. Disc and arm now control this layer.`,`LAYER ${index+1}`,track().hasAudio?'READY TO OVERDUB':'EMPTY');}
+ function select(index){if(locked()||held||!power)return;closeMenu();state.selected=index;render();announce(`Layer ${index+1} selected. Disc and arm now control this layer.`,`LAYER ${index+1}`,findSound(track().source)?.label||(track().hasAudio?'READY TO OVERDUB':'PRESS DIAL / SOUND'));}
  function mute(index){if(!power)return;const t=state.tracks[index];t.muted=!t.muted;send('mute',t.muted,index);render();announce(`Layer ${index+1} ${t.muted?'muted':'unmuted'}.`,`L${index+1} ${t.muted?'MUTE':'ON'}`,'LAYER LEVEL');}
  function setFilter(v){if(!power)return;const value=Math.round(clamp(v,0,100));track().filter=value/100;send('filter',value/100);render();announce(`Layer ${state.selected+1}, filter ${value} percent.`,'FILTER',`${value}% / L${state.selected+1}`);}
  function setMaster(v){master=clamp(Math.round(v),0,100)/100;send('master',master);render();announce(`Output ${Math.round(master*100)} percent.`,'OUTPUT',`${Math.round(master*100)}%`);}
@@ -97,12 +107,13 @@ if(deck){
  gesture(one('[data-session-play]'),{tap:play,hold:()=>{idleSpin=false;recordRequest++;permission=false;releaseDisc();engine.pause();send('rewind');state.playing=false;angle=0;rotor.style.transform='rotate(0deg)';render();announce('Stopped at the start.','STOP','START OF LOOP');}});
  gesture(one('[data-session-undo]'),{allowed:()=>power&&!locked(),tap:()=>{engine.send({type:'undo',index:state.selected});announce(track().canUndo?'Latest layer change undone.':'Nothing to undo.',track().canUndo?'UNDONE':'NO UNDO',`LAYER ${state.selected+1}`);},hold:()=>{engine.send({type:'redo',index:state.selected});announce(track().canRedo?'Layer change restored.':'Nothing to redo.',track().canRedo?'REDONE':'NO REDO',`LAYER ${state.selected+1}`);}});
  one('[data-session-record]').addEventListener('click',async e=>{
-  if(!power||busy)return;idleSpin=false;press(e.currentTarget);releaseDisc();closeMenu();if(permission||state.recording){recordRequest++;const cancel=permission;permission=false;engine.finish(cancel);render();if(cancel)announce('Microphone request cancelled.','CANCELLED','MIC OFF');return;}
+  if(!power||busy)return;if(state.tracks.some(t=>t.queuedSource)){announce('Wait for the queued sound to land on the next bar, then press Record.','WAIT','NEXT BAR');return;}idleSpin=false;press(e.currentTarget);releaseDisc();closeMenu();if(permission||state.recording){recordRequest++;const cancel=permission;permission=false;engine.finish(cancel);render();if(cancel)announce('Microphone request cancelled.','CANCELLED','MIC OFF');return;}
   permission=true;const request=++recordRequest;render();announce('Allow your microphone to record. No audio is uploaded.');
   try{await ready();if(request!==recordRequest)return;await engine.record(state.selected,takeBeats,countIn);}catch(e){if(request===recordRequest)failure(e);}
  });
  one('[data-session-project-file]').addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file||locked())return;await task(async()=>{const settings=await engine.loadProject(file);({master,inputGain,takeBeats,countIn,click}=settings);state.selected=settings.selected;state.bpm=settings.bpm;send('input',inputGain);send('click',click);},'Four-layer session loaded. Press Play to listen.','LOADED');});
  engine.addEventListener('state',({detail})=>{if(!hydrated)return;Object.assign(state,detail);baseChoice=detail.tracks[0].source||'off';render();});engine.addEventListener('mic',({detail})=>{mic=detail;render();});
+ engine.addEventListener('sound-loaded',({detail})=>{announce(`Layer ${detail.index+1}: ${findSound(detail.source)?.label||'off'}.`);});
  engine.addEventListener('armed',()=>{permission=false;announce('Take armed. Capture starts on the loop boundary.');});engine.addEventListener('recording',()=>{permission=false;announce(`Recording layer ${state.selected+1}. Press Record to finish.`);});
  engine.addEventListener('record-end',({detail})=>{permission=false;announce(detail.cancelled?'Take cancelled. Existing audio is safe.':`Layer ${detail.index+1} recorded. Select another layer to add a sound.`,detail.cancelled?'CANCELLED':'CAPTURED',`LAYER ${detail.index+1}`);});
  engine.addEventListener('error',({detail})=>{engine.pause();state.playing=false;state.recording=null;failure(detail);});engine.addEventListener('interrupted',()=>{state.playing=false;state.recording=null;permission=false;render();announce('Audio paused by the browser. Press Play to resume.','PAUSED','PRESS PLAY');});

@@ -5,9 +5,10 @@ Keep changes focused and describe the user-visible behavior and relevant verific
 ## Invariants
 
 - The main dial turns to browse and presses to enter. A drag release must not activate a menu item.
+- Library choices, replacement confirmation and all musical settings stay on the hardware display and controls. Do not add a floating library, modal browser or external mixer.
 - All audio capture is local. Do not add recording uploads, tracking or accounts as incidental changes.
 - Capture runs on the sample clock. Animation frames must not schedule audio.
-- The four base sounds are original synthesis. Do not add uncleared music samples.
+- The sound library and legacy base sounds are original synthesis. Do not add uncleared music samples.
 - The rotating dial faces and disc are circular in their source plane. Rotate first, then apply a fixed perspective projection. Their photographed barrels stay still.
 - Layer dials stay aligned and clear of the disc. Keep the exact approved transport key imagery and legends consistent.
 - Pointer controls have no decorative focus outline; keyboard focus remains visible. Respect reduced motion.

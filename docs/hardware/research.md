@@ -51,7 +51,7 @@ The front surface retains four equally spaced layer dials, three cobalt transpor
 | Performance disc | Touch takeover | Signed movement scrubs selected layer | Hold freezes that layer |
 | Expression arm | — | Selected-layer filter, outward bypass | — |
 
-The amber screen has a home tempo view and a menu context line. MAIN contains SOUND, LOOP, INPUT, SESSION, HELP and EXIT. SOUND changes layer 1's foundation. LOOP contains length, count-in, click and reverse. SESSION contains save, load, export, clear and new. Destructive actions require an explicit confirmation, with Cancel selected first.
+The amber screen has a home tempo view and a menu context line. MAIN contains SOUND, LOOP, INPUT, SESSION, HELP and EXIT. SOUND assigns a loop from ROOM 01 to the selected layer, with drums, bass, chords and textures. Library swaps join at the next bar during playback. LOOP contains length, count-in, click and reverse. SESSION contains save, load, export, clear and new. Destructive actions require an explicit confirmation, with Cancel selected first.
 
 The browser uses a dead zone before a pointer drag counts as turning. Releasing a drag does not activate a menu item. An ordinary press, including small hand movement, activates the current item once. Touch and keyboard use the same hierarchy. This interaction also has an existing physical precedent: RANE describes turning its encoder to choose a torque setting and pressing to confirm it. That establishes a familiar control pattern, not evidence that our particular layout has passed a usability test. [RANE encoder interaction](https://support.rane.com/en/support/solutions/articles/69000865031-rane-performer-adjusting-motor-torque)
 

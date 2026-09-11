@@ -12,9 +12,13 @@
     "test:browser": "node tests/browser.mjs",
     "audit:public": "node scripts/audit-public.mjs",
     "hardware:model": "node scripts/hardware-model.mjs",
-    "test:guide": "node tests/guide.browser.mjs"
+    "test:guide": "node tests/guide.browser.mjs",
+    "test:library": "node tests/library.browser.mjs"
   },
   "devDependencies": {
     "playwright": "^1.63.0"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
   }
 }

@@ -1,4 +1,5 @@
 import {presetLoop} from './presets.mjs';
+import {libraryLoop} from './library.mjs';
 import {encodeProject,decodeProject} from './project.mjs';
 import {renderMix,wav} from './files.mjs';
 export class TapeEngine extends EventTarget{
@@ -66,6 +67,7 @@ export class TapeEngine extends EventTarget{
  }
  finish(cancel=false){this.send({type:'finish',cancel});this.releaseMic();}
  async base(id,bpm){await this.init();if(id==='off'){this.send({type:'clear',index:0});return;}this.send({type:'load',index:0,...presetLoop(id,this.context.sampleRate,bpm)});}
+ async sound(index,id,quantize=true){await this.init();if(!Number.isInteger(index)||index<0||index>3)throw Error('Select one of the four layers.');this.send({type:quantize?'queue-load':'load',index,...(id==='off'?{samples:null,beats:8,source:null}:libraryLoop(id,this.context.sampleRate))});}
  async exportState(){await this.init();const id=++this.requestId;const state=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{this.exports.delete(id);reject(Error('Export timed out. Please retry.'));},5000);this.exports.set(id,data=>{clearTimeout(timer);resolve(data);});this.send({type:'export',id});});return state;}
  saveFile(bytes,name,type){const url=URL.createObjectURL(new Blob([bytes],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
  async download(){const state=await this.exportState();this.saveFile(wav(renderMix(state),state.sampleRate),`TAPE-session-${state.bpm}bpm.wav`,'audio/wav');}

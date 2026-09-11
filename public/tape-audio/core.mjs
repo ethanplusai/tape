@@ -5,16 +5,29 @@ export function read(samples,position){
  const p=mod(position,samples.length),i=Math.floor(p),f=p-i;
  return samples[i]+(samples[(i+1)%samples.length]-samples[i])*f;
 }
-const emptyTrack=()=>({samples:null,source:null,beats:8,level:.75,gain:0,muted:false,reverse:false,filter:0,low:0,history:[],future:[],takes:0,scrub:null,release:null});
+const emptyTrack=()=>({samples:null,source:null,beats:8,level:.75,gain:0,muted:false,reverse:false,filter:0,low:0,history:[],future:[],takes:0,scrub:null,release:null,swap:null});
 export class TapeCore{
- constructor(sampleRate=48000,onEvent=()=>{}){this.sampleRate=sampleRate;this.onEvent=onEvent;this.tracks=Array.from({length:4},emptyTrack);this.bpm=96;this.beat=0;this.playing=false;this.master=.7;this.inputGain=1;this.click=false;this.recording=null;this.smooth=1-Math.exp(-1/(sampleRate*.006));this.inputRms=0;this.outputRms=0;this.peak=0;}
+ constructor(sampleRate=48000,onEvent=()=>{}){this.sampleRate=sampleRate;this.onEvent=onEvent;this.tracks=Array.from({length:4},emptyTrack);this.bpm=96;this.beat=0;this.playing=false;this.master=.7;this.inputGain=1;this.click=false;this.recording=null;this.smooth=1-Math.exp(-1/(sampleRate*.006));this.inputRms=0;this.outputRms=0;this.peak=0;this.pendingLoads=Array(4).fill(null);}
  remember(t){t.future=[];t.history.push({samples:t.samples,source:t.source,beats:t.beats,takes:t.takes});if(t.history.length>3)t.history.shift();}
- load(index,samples,beats=8,source='custom'){const t=this.tracks[index];this.remember(t);t.samples=samples;t.source=source;t.beats=beats;t.takes=1;t.low=0;}
- undo(index){if(this.recording)return;const t=this.tracks[index],old=t.history.pop();if(old){t.future.push({samples:t.samples,source:t.source,beats:t.beats,takes:t.takes});Object.assign(t,old,{low:0,scrub:null,release:null});}}
- redo(index){if(this.recording)return;const t=this.tracks[index],next=t.future.pop();if(next){t.history.push({samples:t.samples,source:t.source,beats:t.beats,takes:t.takes});Object.assign(t,next,{low:0,scrub:null,release:null});}}
- clear(index){if(this.recording)return;const t=this.tracks[index];if(t.samples){this.remember(t);Object.assign(t,{samples:null,source:null,takes:0,low:0,scrub:null,release:null});}}
+ load(index,samples,beats=8,source='custom'){
+  const t=this.tracks[index];this.remember(t);
+  t.swap=this.playing&&t.samples?{samples:t.samples,beats:t.beats,reverse:t.reverse,left:Math.round(this.sampleRate*.012),total:Math.round(this.sampleRate*.012)}:null;
+  t.samples=samples;t.source=samples?source:null;t.beats=beats;t.takes=samples?1:0;t.scrub=null;t.release=null;
+ }
+ queueLoad(index,samples,beats,source){
+  if(this.recording)return;
+  this.pendingLoads[index]={samples,beats,source,at:this.playing?Math.ceil((this.beat+1e-6)/4)*4:this.beat};
+  if(!this.playing)this.applyPending(true);
+ }
+ applyPending(force=false){
+  for(let i=0;i<4;i++){const p=this.pendingLoads[i];if(p&&(force||this.beat+1e-8>=p.at)){this.pendingLoads[i]=null;this.load(i,p.samples,p.beats,p.source);this.onEvent({type:'sound-loaded',index:i,source:p.source});}}
+ }
+ undo(index){if(this.recording)return;if(this.pendingLoads[index]){this.pendingLoads[index]=null;return;}const t=this.tracks[index],old=t.history.pop();if(old){t.future.push({samples:t.samples,source:t.source,beats:t.beats,takes:t.takes});Object.assign(t,old,{low:0,scrub:null,release:null,swap:null});}}
+ redo(index){if(this.recording)return;this.pendingLoads[index]=null;const t=this.tracks[index],next=t.future.pop();if(next){t.history.push({samples:t.samples,source:t.source,beats:t.beats,takes:t.takes});Object.assign(t,next,{low:0,scrub:null,release:null,swap:null});}}
+ clear(index){if(this.recording)return;this.pendingLoads[index]=null;const t=this.tracks[index];if(t.samples){this.remember(t);Object.assign(t,{samples:null,source:null,takes:0,low:0,scrub:null,release:null,swap:null});}}
  startRecord(index,beats=8,countIn=false){
   if(this.recording)return;
+  if(this.pendingLoads.some(Boolean)){this.onEvent({type:'record-end',cancelled:true,index});return;}
   const t=this.tracks[index],reference=this.tracks.find(t=>t.samples);beats=t.samples?t.beats:beats===0&&reference?reference.beats:beats;
   const free=beats===0;
   const hasAudio=this.tracks.some(t=>t.samples);
@@ -43,7 +56,7 @@ export class TapeCore{
  command(m){
   const t=this.tracks[m.index];
   switch(m.type){
-   case 'play':if(!m.value&&this.recording)this.finishRecord();this.playing=!!m.value;break;
+   case 'play':if(!m.value&&this.recording)this.finishRecord();this.playing=!!m.value;if(!this.playing)this.applyPending(true);break;
    case 'tempo':if(!this.recording)this.bpm=clamp(m.value,40,240);break;
    case 'level':if(t)t.level=clamp(m.value,0,1);break;
    case 'mute':if(t)t.muted=!!m.value;break;
@@ -53,14 +66,15 @@ export class TapeCore{
    case 'input':this.inputGain=clamp(m.value,0,2);break;
    case 'click':this.click=!!m.value;break;
    case 'rewind':if(!this.recording)this.beat=0;break;
-   case 'load':if(!this.recording)this.load(m.index,m.samples,m.beats,m.source);break;
+   case 'load':if(!this.recording){this.pendingLoads[m.index]=null;this.load(m.index,m.samples,m.beats,m.source);}break;
+   case 'queue-load':this.queueLoad(m.index,m.samples,m.beats,m.source);break;
    case 'record':this.startRecord(m.index,m.beats,m.countIn);break;
    case 'finish':this.finishRecord(m.cancel);break;
    case 'undo':this.undo(m.index);break;
    case 'redo':this.redo(m.index);break;
    case 'clear':this.clear(m.index);break;
-   case 'new':if(!this.recording){this.tracks=Array.from({length:4},emptyTrack);this.beat=0;this.playing=false;}break;
-   case 'restore':if(!this.recording){this.tracks=m.state.tracks.map(t=>Object.assign(emptyTrack(),t,{takes:t.samples?1:0}));this.bpm=m.state.bpm;this.master=m.state.master;this.playing=false;this.beat=0;}break;
+   case 'new':if(!this.recording){this.tracks=Array.from({length:4},emptyTrack);this.pendingLoads.fill(null);this.beat=0;this.playing=false;}break;
+   case 'restore':if(!this.recording){this.pendingLoads.fill(null);this.tracks=m.state.tracks.map(t=>Object.assign(emptyTrack(),t,{takes:t.samples?1:0}));this.bpm=m.state.bpm;this.master=m.state.master;this.playing=false;this.beat=0;}break;
    case 'scrub-start':this.beginScrub(m.index);break;
    case 'scrub-move':this.moveScrub(m.index,m.delta);break;
    case 'scrub-end':this.endScrub(m.index);break;
@@ -77,6 +91,7 @@ export class TapeCore{
   // Filter coefficients are stable across this render quantum.
   const coefficients=this.tracks.map(t=>1-Math.exp(-2*Math.PI*(180*Math.pow(20000/180,1-t.filter))/this.sampleRate));
   for(let n=0;n<output.length;n++){
+   this.applyPending();
    const raw=Number.isFinite(input?.[n])?input[n]:0,x=clamp(raw*this.inputGain,-1,1);inputEnergy+=x*x;
    const r=this.recording;
    if(r&&this.beat+step*.5>=r.start){
@@ -86,13 +101,14 @@ export class TapeCore{
    let mix=0;
    for(let i=0;i<4;i++){
     const t=this.tracks[i],s=t.scrub;t.gain+=((t.muted?0:t.level)-t.gain)*this.smooth;
-    if(!t.samples)continue;
+    if(!t.samples&&!t.swap)continue;
     let signal=0;
     if(s){
      const target=clamp((s.target-s.position)*45,-step*this.sampleRate*8,step*this.sampleRate*8)/this.sampleRate;
      s.rate+=(target-s.rate)*this.smooth;s.position+=s.rate;
      signal=this.sampleTrack(t,s.position)*Math.min(1,Math.abs(s.rate)/step*2);
-    }else if(this.playing){signal=this.sampleTrack(t,this.beat*(t.reverse?-1:1));}
+    }else if(this.playing&&t.samples){signal=this.sampleTrack(t,this.beat*(t.reverse?-1:1));}
+    if(t.swap){const f=t.swap.left/t.swap.total;if(this.playing)signal=signal*(1-f)+this.sampleTrack(t.swap,this.beat*(t.swap.reverse?-1:1))*f;if(--t.swap.left<=0)t.swap=null;}
     if(t.release){const f=t.release.left/t.release.total;signal=signal*(1-f)+this.sampleTrack(t,t.release.position)*f;if(--t.release.left<=0)t.release=null;}
     t.low+=coefficients[i]*(signal-t.low);signal=t.filter>0?t.low:signal;
     mix+=signal*t.gain;
@@ -104,6 +120,6 @@ export class TapeCore{
   }
   this.inputRms=Math.sqrt(inputEnergy/output.length);this.outputRms=Math.sqrt(outputEnergy/output.length);this.peak=peak;
  }
- snapshot(){return {bpm:this.bpm,beat:this.beat,playing:this.playing,inputRms:this.inputRms,outputRms:this.outputRms,peak:this.peak,recording:this.recording?{index:this.recording.index,phase:this.recording.phase,progress:this.recording.at/this.recording.frames,seconds:this.recording.at/this.sampleRate,free:this.recording.free,remaining:Math.max(0,this.recording.start-this.beat)}:null,tracks:this.tracks.map(t=>({hasAudio:!!t.samples,source:t.source,frames:t.samples?.length||0,beats:t.beats,level:t.level,muted:t.muted,reverse:t.reverse,filter:t.filter,takes:t.takes,canUndo:!!t.history.length,canRedo:!!t.future.length,scrubbing:!!t.scrub,scrubRate:t.scrub?.rate/this.bpm*60*this.sampleRate||0}))};}
+ snapshot(){return {bpm:this.bpm,beat:this.beat,playing:this.playing,inputRms:this.inputRms,outputRms:this.outputRms,peak:this.peak,recording:this.recording?{index:this.recording.index,phase:this.recording.phase,progress:this.recording.at/this.recording.frames,seconds:this.recording.at/this.sampleRate,free:this.recording.free,remaining:Math.max(0,this.recording.start-this.beat)}:null,tracks:this.tracks.map((t,i)=>({queuedSource:this.pendingLoads[i]?(this.pendingLoads[i].source||'off'):null,hasAudio:!!t.samples,source:t.source,frames:t.samples?.length||0,beats:t.beats,level:t.level,muted:t.muted,reverse:t.reverse,filter:t.filter,takes:t.takes,canUndo:!!t.history.length||!!this.pendingLoads[i],canRedo:!!t.future.length,scrubbing:!!t.scrub,scrubRate:t.scrub?.rate/this.bpm*60*this.sampleRate||0}))};}
  exportState(){return {sampleRate:this.sampleRate,bpm:this.bpm,master:this.master,tracks:this.tracks.map(({samples,source,beats,level,muted,reverse,filter})=>({samples,source,beats,level,muted,reverse,filter}))};}
 }

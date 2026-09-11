@@ -1,13 +1,13 @@
 # Play TAPE in your browser
 
-Choose **Learn the controls** in the header for a photographic guide to playback, recording, layers, tempo, the disc, the arm, loop setup, base sounds and saved sessions. **Find this on the deck** brings you to the matching physical control or menu in the hero. This navigation never starts audio or changes recorded layers. During a take, it brings you back to the deck without changing its view or menu.
+Choose **Learn the controls** in the header for a photographic guide to playback, recording, layers, tempo, the disc, the arm, loop setup, library sounds and saved sessions. **Find this on the deck** brings you to the matching physical control or menu in the hero. This navigation never starts audio or changes recorded layers. During a take, it brings you back to the deck without changing its view or menu.
 
-All musical controls are on the deck. Layer 2 is selected on arrival so you can record over the base on layer 1. Use **Inspect controls** for the right rail or **Layers** for the front row.
+All musical controls are on the deck. Layer 2 is selected on arrival so you can add a bass line from SOUND or record over the drums on layer 1. Use **Inspect controls** for the right rail or **Layers** for the front row.
 
 | Control | Gesture | Result |
 | --- | --- | --- |
 | Record dot | Press | Request microphone and capture the selected layer; press again to finish or cancel a pending permission request |
-| Play triangle | Press / hold | Play or pause / stop and rewind. Layer 1 starts with the selected base sound; layers 2–4 are yours to record |
+| Play triangle | Press / hold | Play or pause / stop and rewind. Layer 1 starts with drums; add library sounds or mic recordings to any layer |
 | Undo curve | Press / hold | Undo / redo the selected layer's latest audio edit |
 | Four small dials | Press / turn / hold | Select that layer / adjust its level / mute or unmute |
 | Large right dial | Turn / press | Adjust 40–240 BPM / open or confirm an on-device menu |
@@ -21,7 +21,7 @@ Keyboard: focus a dial and use arrow keys; Shift multiplies the step by ten. Hom
 
 ## Main dial menu
 
-- **Sound:** DUST, PULSE, HALF, WARM or OFF. Turn to browse; press to apply. Changes only layer 1. Replacing a recorded/overdubbed layer requires confirmation. Undo can restore the previous sound.
+- **Sound:** select a layer with its bottom dial, then enter SOUND → DRUMS / BASS / CHORDS / TEXTURE → a sound. Three variants of each are available. Turn to browse; press to apply. OFF empties only the selected layer. Replacing a mic recording or overdub requires confirmation. During playback, a confirmed swap waits for the next bar. Undo cancels a queued change or restores the previous sound after it lands. Pausing applies queued choices immediately. Wait for a queued sound to land before recording.
 - **Loop:** Free / 1 / 2 / 4 bar take length, count-in, metronome, selected-layer reverse.
 - **Input:** browser microphone input gain, 0–200%. The browser/OS chooses the input source. No live input monitoring.
 - **Session:** Save an editable `.tape` project, Load a saved project, Export a mixed WAV, Clear selected layer, New empty session. Load, Clear and New require confirmation on the deck display.
@@ -38,6 +38,8 @@ Microphone audio is mono, stays in this tab's memory, and is never uploaded. It 
 **Save** preserves the four individual PCM tracks, levels, mute, reverse, filter, tempo, output and loop settings in a versioned local `.tape` file. **Load** validates the entire file before replacing audio; it converts the sample rate if needed. No executable content is read. Undo history and an unfinished take are not saved. Reloading without saving loses the session. There is no automatic browser storage.
 
 **Export** renders 16-bit mono PCM WAV for the longest recorded loop, with current tempo, levels, direction, filters and master gain. The metronome is excluded. Loops with unequal, non-multiple lengths may not all end on a boundary in this mix export; keep the editable project as well.
+
+See [ROOM 01](sound-library.md) for sound names, musical structure and library limitations. Save/export captures the currently applied layers, so let queued changes land before saving.
 
 ## Implementation and limits
 
